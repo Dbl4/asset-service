@@ -3,9 +3,6 @@
   "info": {
     "title": "User Management API",
     "description": "API endpoints for user management",
-    "contact": {
-      "email": "contact@example.com"
-    },
     "version": "1.0.0"
   },
   "servers": [
@@ -16,8 +13,8 @@
   "paths": {
     "/users/login/": {
       "post": {
-        "summary": "User login",
-        "description": "Authenticate a user and get an access token.",
+        "summary": "Аутентификация пользователя",
+        "description": "Аутентификация пользователя",
         "responses": {
           "200": {
             "description": "Successful login",
@@ -43,8 +40,8 @@
     },
     "/users/register/": {
       "post": {
-        "summary": "User registration",
-        "description": "Register a new user.",
+        "summary": "Регистрация пользователя",
+        "description": "Регистрация пользователя",
         "responses": {
           "201": {
             "description": "User registered",
@@ -76,8 +73,8 @@
     },
     "/users/profile/{pk}/": {
       "put": {
-        "summary": "Update user profile",
-        "description": "Update user profile details.",
+        "summary": "Обновить профиль пользователя",
+        "description": "Обновить профиль пользователя",
         "parameters": [
           {
             "name": "pk",
@@ -120,8 +117,8 @@
     },
     "/users/logout/": {
       "post": {
-        "summary": "User logout",
-        "description": "Logout a user.",
+        "summary": "Выход авторизованного пользователя",
+        "description": "Выход авторизованного пользователя.",
         "responses": {
           "200": {
             "description": "Successful logout",
@@ -137,6 +134,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/users/assets/": {
+      "get": {
+        "summary": "Пользовательские активы",
+        "description": "Получить список активов, принадлежащих аутентифицированному пользователю",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "entry_date": {
+                    "type": "string",
+                    "format": "date"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
