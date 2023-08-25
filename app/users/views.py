@@ -1,10 +1,13 @@
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
-from django.contrib.auth.views import LoginView
-from django.views.generic.edit import CreateView
+from django.contrib.auth.views import LoginView, LogoutView
+from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView, UpdateView
 from django.contrib.messages.views import SuccessMessageMixin
 
-
-from users.forms import UserLoginForm, UserRegisterForm
+from assets.models import Asset
+from users.forms import UserLoginForm, UserRegisterForm, UserProfileForm
 from users.models import User
 
 
@@ -29,32 +32,46 @@ class UserRegisterView(SuccessMessageMixin, CreateView):
         context['title'] = 'Регистрация'
         return context
 
-    # def form_valid(self, form):
-    #     super().form_valid(form)
-    #     user = form.save()
-    #     if send_verify_email(user):
-    #         print('Сообщение отправлено.')
-    #         return HttpResponseRedirect(reverse('users:login'))
-    #     else:
-    #         print('Не удалось отправить сообщение.')
-    #         return HttpResponseRedirect(reverse('users:login'))
+
+class UserProfileUpdateView(SuccessMessageMixin, UpdateView):
+    model = User
+    template_name = 'users/profile.html'
+    form_class = UserProfileForm
+    success_message = 'Изменения сохранены!'
+
+    def get_success_url(self):
+        return reverse_lazy('users:profile', args=(self.object.id,))
+
+    def get_context_data(self, **kwargs):
+        context = super(UserProfileUpdateView, self).get_context_data(**kwargs)
+        context['password_change_form'] = PasswordChangeForm(self.request.user)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        password_change_form = PasswordChangeForm(self.request.user, request.POST)
+
+        if form.is_valid() and password_change_form.is_valid():
+            new_password = password_change_form.cleaned_data['new_password1']
+            self.request.user.set_password(new_password)
+            self.request.user.save()
+
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
 
 
-# class UserProfileUpdateView(SuccessMessageMixin, UpdateView):
-#     model = User
-#     template_name = 'users/profile.html'
-#     form_class = UserProfileForm
-#     success_message = 'Изменения сохранены!'
-#
-#     def get_success_url(self):
-#         return reverse_lazy('users:profile', args =(self.object.id,))
-#
-#     def get_context_data(self, **kwargs):
-#         context = super(UserProfileUpdateView, self).get_context_data(**kwargs)
-#         context['title'] = 'GeekShop - Профиль'
-#         context['baskets'] = Basket.objects.filter(user=self.object)
-#         return context
-#
-#
-# class UserLogoutView(LogoutView):
-#     template_name = 'users/login.html'
+class UserLogoutView(LogoutView):
+    template_name = 'users/login.html'
+
+
+class UserAssetsView(LoginRequiredMixin, TemplateView):
+    template_name = 'users/assets.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        assets = Asset.objects.filter(owner=user)
+        context['assets'] = assets
+        return context

@@ -1,0 +1,23 @@
+{% extends 'users/base.html' %}
+
+{% block content %}
+  <h2>My Assets</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+        <th>Entry Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for asset in assets %}
+        <tr>
+          <td>{{ asset.name }}</td>
+          <td>{{ asset.status }}</td>
+          <td>{{ asset.entry_date }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
